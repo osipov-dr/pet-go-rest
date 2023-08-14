@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"net"
@@ -8,6 +9,8 @@ import (
 	"os"
 	"osipovPetRestApi/internal/config"
 	"osipovPetRestApi/internal/user"
+	"osipovPetRestApi/internal/user/db"
+	"osipovPetRestApi/pkg/client/mongodb"
 	"osipovPetRestApi/pkg/logging"
 	"path"
 	"path/filepath"
@@ -20,6 +23,26 @@ func main() {
 	router := httprouter.New()
 
 	cfg := config.GetConfig()
+
+	cfgMongo := cfg.MongoDB
+	mongoDBClient, err := mongodb.NewClient(context.Background(), cfgMongo.Host, cfgMongo.Port, cfgMongo.Username,
+		cfgMongo.Password, cfgMongo.Database, cfgMongo.AuthDB)
+	if err != nil {
+		panic(err)
+	}
+	storage := db.NewStorage(mongoDBClient, cfgMongo.Collection, logger)
+
+	user1 := user.User{
+		Id:           "",
+		Name:         "Dmitry",
+		PasswordHash: "123456",
+		Email:        "os_dimay@mail.ru",
+	}
+	user1Id, err := storage.Create(context.Background(), user1)
+	if err != nil {
+		panic(err)
+	}
+	logger.Info(user1Id)
 
 	logger.Info("register user handler")
 	handler := user.NewHandler(logger)
