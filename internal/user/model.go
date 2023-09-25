@@ -1,9 +1,9 @@
 package user
 
 type User struct {
-	Id           string `json:"id" bson:"_id, omitempty"`
+	Id           string `json:"id" bson:"_id,omitempty"`
 	Name         string `json:"name" bson:"name"`
-	PasswordHash string `json:"-" bson:"password_hash"`
+	PasswordHash string `json:"-" bson:"password"`
 	Email        string `json:"email" bson:"email"`
 }
 
